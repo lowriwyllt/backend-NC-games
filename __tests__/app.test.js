@@ -42,3 +42,33 @@ describe("/api/categories", () => {
       });
   });
 });
+
+describe("/api/reviews/:review_id", () => {
+  it("GET 200: responds with the review with review_id", () => {
+    return request(app)
+      .get("/api/reviews/2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.review).toMatchObject({
+          review_id: 2,
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700",
+          review_body: "Fiddly fun for all the family",
+          category: "dexterity",
+          created_at: expect.any(String), //can't check for the exact date
+          votes: 5,
+        });
+      });
+  });
+  it("GET 400: responds with message 'invalid review_id'", () => {
+    return request(app)
+      .get("/api/reviews/not_a_num")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid review_id");
+      });
+  });
+});
