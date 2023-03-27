@@ -71,4 +71,12 @@ describe("/api/reviews/:review_id", () => {
         expect(body.msg).toBe("Invalid review_id");
       });
   });
+  it("GET 400: responds with message 'Review_id does not exist'", () => {
+    return request(app)
+      .get("/api/reviews/0")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Review_id does not exist");
+      });
+  });
 });

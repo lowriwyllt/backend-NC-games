@@ -1,6 +1,7 @@
 const express = require("express");
 const { getCategories } = require("./controllers/categories.controller");
 const { getReviewById } = require("./controllers/reviews.controller");
+const { psqlErrors } = require("./errors");
 
 const app = express();
 
@@ -8,7 +9,11 @@ app.get("/api/categories", getCategories);
 app.get("/api/reviews/:review_id", getReviewById);
 
 app.use((err, req, res, next) => {
-  if (err.status && err.msg) {
+  if (err.code) {
+    //PSQL Errors
+    psqlErrors(err.code, res);
+  } else if (err.status && err.msg) {
+    //My personalised error messages
     res.status(err.status).send({ msg: err.msg });
   }
 });
