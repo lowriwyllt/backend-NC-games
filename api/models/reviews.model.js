@@ -21,7 +21,7 @@ exports.fetchReviews = () => {
   reviews.created_at, 
   reviews.votes, 
   reviews.designer, 
-  COUNT(comments.comment_id) AS comment_count 
+  CAST(COUNT(comments.comment_id) AS INT) AS comment_count 
   FROM reviews
   LEFT JOIN comments
   ON comments.review_id = reviews.review_id
