@@ -1,5 +1,6 @@
 const express = require("express");
 const { getCategories } = require("./controllers/categories.controller");
+const { getComments } = require("./controllers/comments.controller");
 const {
   getReviewById,
   getReviews,
@@ -11,6 +12,7 @@ const app = express();
 app.get("/api/categories", getCategories);
 app.get("/api/reviews/:review_id", getReviewById);
 app.get("/api/reviews", getReviews);
+app.get("/api/reviews/:review_id/comments", getComments);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);
