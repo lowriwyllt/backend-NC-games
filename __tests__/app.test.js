@@ -25,6 +25,9 @@ describe("/api/categories", () => {
         });
       });
   });
+});
+
+describe("Handles invalid paths", () => {
   it("GET 404: responds with an error message that the path doesn't exist, when given wrong path", () => {
     return request(app)
       .get("/api/not/a/path")
@@ -82,7 +85,7 @@ describe("/api/reviews/:review_id", () => {
 });
 
 describe("/api/reviews", () => {
-  it("GET 200: responds with an array of all the reviews ", () => {
+  it("GET 200: responds with an array of all the reviews, that are ordered by 'created_at' in descending order", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
