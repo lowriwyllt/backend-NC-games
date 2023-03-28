@@ -25,6 +25,9 @@ describe("/api/categories", () => {
         });
       });
   });
+});
+
+describe("Handles invalid paths", () => {
   it("GET 404: responds with an error message that the path doesn't exist, when given wrong path", () => {
     return request(app)
       .get("/api/not/a/path")
@@ -77,6 +80,33 @@ describe("/api/reviews/:review_id", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Review_id does not exist");
+      });
+  });
+});
+
+describe("/api/reviews", () => {
+  it("GET 200: responds with an array of all the reviews, that are ordered by 'created_at' in descending order", () => {
+    return request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeInstanceOf(Array);
+        expect(body.reviews).toHaveLength(testData.reviewData.length);
+        expect(body.reviews).toBeSortedBy("created_at", { descending: true });
+        body.reviews.forEach((review) => {
+          expect(review).toBeInstanceOf(Object);
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
       });
   });
 });
