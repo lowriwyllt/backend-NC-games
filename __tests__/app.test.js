@@ -80,3 +80,30 @@ describe("/api/reviews/:review_id", () => {
       });
   });
 });
+
+describe("/api/reviews", () => {
+  it("GET 200: responds with an array of all the reviews ", () => {
+    return request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeInstanceOf(Array);
+        expect(body.reviews).toHaveLength(testData.reviewData.length);
+        expect(body.reviews).toBeSortedBy("created_at", { descending: true });
+        body.reviews.forEach((review) => {
+          expect(review).toBeInstanceOf(Object);
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+      });
+  });
+});

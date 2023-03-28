@@ -1,9 +1,6 @@
 const db = require("../../db/connection");
 
 exports.fetchReviewById = (review_id) => {
-  // if (isNaN(review_id)) {
-  //   return Promise.reject({ status: 400, msg: "Invalid review_id" });
-  // }
   const selectReviewString = `
       SELECT *
       FROM reviews
@@ -11,5 +8,27 @@ exports.fetchReviewById = (review_id) => {
       `;
   return db.query(selectReviewString, [review_id]).then((response) => {
     return response.rows[0];
+  });
+};
+
+exports.fetchReviews = () => {
+  const selectReviewsString = `
+  SELECT reviews.owner, 
+  reviews.title, 
+  reviews.review_id, 
+  reviews.category, 
+  reviews.review_img_url, 
+  reviews.created_at, 
+  reviews.votes, 
+  reviews.designer, 
+  COUNT(comments.comment_id) AS comment_count 
+  FROM reviews
+  LEFT JOIN comments
+  ON comments.review_id = reviews.review_id
+  GROUP BY reviews.review_id
+  ORDER BY reviews.created_at DESC; 
+      `;
+  return db.query(selectReviewsString).then((response) => {
+    return response.rows;
   });
 };
