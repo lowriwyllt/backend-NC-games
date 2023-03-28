@@ -123,6 +123,7 @@ describe("/api/reviews/:review_id/comments", () => {
         body.comments.forEach((comment) => {
           expect(comment).toMatchObject({
             comment_id: expect.any(Number),
+            votes: expect.any(Number),
             created_at: expect.any(String),
             author: expect.any(String),
             body: expect.any(String),
@@ -156,4 +157,28 @@ describe("/api/reviews/:review_id/comments", () => {
         expect(body.msg).toBe("review_id does not exist");
       });
   });
+  it("POST 201: responds with posted comment", () => {
+    const commentObj = {
+      username: "dav3rid",
+      body: "hi this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send(commentObj)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: 0,
+          created_at: expect.any(String),
+          author: "dav3rid",
+          body: "hi this is a new comment",
+          review_id: 1,
+        });
+      });
+  });
+  // it("POST 404: error if review_id doesn't exist", () => {});
+  // it("POST 400: invalid review_id error", () => {});
+  // it("POST 400: invalid format for a comment", () => {});
 });
