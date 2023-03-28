@@ -74,7 +74,7 @@ describe("/api/reviews/:review_id", () => {
         expect(body.msg).toBe("Invalid review_id");
       });
   });
-  it("GET 400: responds with message 'Review_id does not exist'", () => {
+  it("GET 404: responds with message 'Review_id does not exist'", () => {
     return request(app)
       .get("/api/reviews/0")
       .expect(404)
@@ -107,6 +107,53 @@ describe("/api/reviews", () => {
             comment_count: expect.any(Number),
           });
         });
+      });
+  });
+});
+
+describe("/api/reviews/:review_id/comments", () => {
+  it("GET 200: respond with array of comments for the inputted review_id ", () => {
+    return request(app)
+      .get("/api/reviews/3/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments).toBeSortedBy("created_at", { descending: true });
+        expect(body.comments.length > 0).toBe(true);
+        body.comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            review_id: expect.any(Number),
+          });
+        });
+      });
+  });
+  it("GET 200: respond with empty array if no comments for the review", () => {
+    return request(app)
+      .get("/api/reviews/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments.length).toBe(0);
+      });
+  });
+  it("GET 400: responds with message 'invalid review_id", () => {
+    return request(app)
+      .get("/api/reviews/not_a_num/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid review_id");
+      });
+  });
+  it("GET 404: responds with message 'review_id does not exists'", () => {
+    return request(app)
+      .get("/api/reviews/0/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("review_id does not exist");
       });
   });
 });
