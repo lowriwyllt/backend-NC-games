@@ -38,7 +38,7 @@ exports.checkColumnExists = (table, column, value) => {
       `;
     return db.query(selectReviewString, arrParameters).then((result) => {
       if (result.rowCount === 0) {
-        return { status: 404, msg: `${column} does not exist` };
+        return Promise.reject({ status: 404, msg: `${column} does not exist` });
       }
     });
   }

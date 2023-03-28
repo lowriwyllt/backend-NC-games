@@ -148,4 +148,12 @@ describe("/api/reviews/:review_id/comments", () => {
         expect(body.msg).toBe("Invalid review_id");
       });
   });
+  it("GET 404: responds with message 'review_id does not exists'", () => {
+    return request(app)
+      .get("/api/reviews/0/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("review_id does not exist");
+      });
+  });
 });
