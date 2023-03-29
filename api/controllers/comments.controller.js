@@ -37,10 +37,10 @@ exports.postComment = (req, res, next) => {
 exports.deleteAComment = (req, res, next) => {
   const { comment_id } = req.params;
 
-  Promise.all([
-    removeAComment(comment_id),
-    checkColumnExists("comments", "comment_id", comment_id),
-  ])
+  checkColumnExists("comments", "comment_id", comment_id)
+    .then(() => {
+      removeAComment(comment_id);
+    })
     .then(() => {
       res.sendStatus(204);
     })
