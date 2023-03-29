@@ -3,6 +3,7 @@ const { getCategories } = require("./controllers/categories.controller");
 const {
   getComments,
   postComment,
+  deleteAComment,
 } = require("./controllers/comments.controller");
 const {
   getReviewById,
@@ -21,6 +22,7 @@ app.get("/api/reviews", getReviews);
 app.get("/api/reviews/:review_id/comments", getComments);
 app.post("/api/reviews/:review_id/comments", postComment);
 app.patch("/api/reviews/:review_id", patchVotesToReview);
+app.delete("/api/comments/:comment_id", deleteAComment);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);

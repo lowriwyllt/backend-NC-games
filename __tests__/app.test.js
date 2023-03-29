@@ -326,3 +326,25 @@ describe("/api/reviews/:review_id/comments", () => {
       });
   });
 });
+
+describe("/api/comments/:comment_id", () => {
+  it("DELETE 204: responds no content", () => {
+    return request(app).delete("/api/comments/1").expect(204);
+  });
+  it("DELETE 400: invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/not_a_num")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("request includes invalid value");
+      });
+  });
+  it("DELETE 404: comment_id not found", () => {
+    return request(app)
+      .delete("/api/comments/0")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("comment_id does not exist");
+      });
+  });
+});
