@@ -66,20 +66,103 @@ describe("/api/reviews/:review_id", () => {
         });
       });
   });
-  it("GET 400: responds with message 'invalid review_id'", () => {
+  it("GET 400: responds with message 'request includes invalid value'", () => {
     return request(app)
       .get("/api/reviews/not_a_num")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid review_id");
+        expect(body.msg).toBe("request includes invalid value");
       });
   });
-  it("GET 404: responds with message 'Review_id does not exist'", () => {
+  it("GET 404: responds with message 'review_id does not exist'", () => {
     return request(app)
       .get("/api/reviews/0")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Review_id does not exist");
+        expect(body.msg).toBe("review_id does not exist");
+      });
+  });
+  it("PATCH 200: responds with updated review if incrementing by 1", () => {
+    return request(app)
+      .patch("/api/reviews/1")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.review).toMatchObject({
+          title: "Agricola",
+          designer: "Uwe Rosenberg",
+          owner: "mallionaire",
+          review_img_url:
+            "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+          review_body: "Farmyard fun!",
+          category: "euro game",
+          created_at: expect.any(String),
+          votes: 2,
+        });
+      });
+  });
+  it("PATCH 200: responds with updated review if decrementing by 1", () => {
+    return request(app)
+      .patch("/api/reviews/1")
+      .send({ inc_votes: -1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.review).toMatchObject({
+          title: "Agricola",
+          designer: "Uwe Rosenberg",
+          owner: "mallionaire",
+          review_img_url:
+            "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+          review_body: "Farmyard fun!",
+          category: "euro game",
+          created_at: expect.any(String),
+          votes: 0,
+        });
+      });
+  });
+  it("PATCH 400: if no inc_votes on request body responds with error ", () => {
+    return request(app)
+      .patch("/api/reviews/1")
+      .send({ votessss: -1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid format: has invalid properties");
+      });
+  });
+  it("PATCH 400: if inc_votes NaN", () => {
+    return request(app)
+      .patch("/api/reviews/1")
+      .send({ inc_votes: "not_a_num" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("request includes invalid value");
+      });
+  });
+  it("PATCH 400: has another property on request body", () => {
+    return request(app)
+      .patch("/api/reviews/1")
+      .send({ inc_votes: 1, my_name: "name" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid format: has invalid properties");
+      });
+  });
+  it("PATCH 404: responds with message 'review_id does not exist'", () => {
+    return request(app)
+      .patch("/api/reviews/0")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("review_id does not exist");
+      });
+  });
+  it("PATCH 400: responds with message 'request includes invalid value'", () => {
+    return request(app)
+      .patch("/api/reviews/not_a_num")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("request includes invalid value");
       });
   });
 });
@@ -141,12 +224,12 @@ describe("/api/reviews/:review_id/comments", () => {
         expect(body.comments.length).toBe(0);
       });
   });
-  it("GET 400: responds with message 'invalid review_id", () => {
+  it("GET 400: responds with message 'request includes invalid value'", () => {
     return request(app)
       .get("/api/reviews/not_a_num/comments")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid review_id");
+        expect(body.msg).toBe("request includes invalid value");
       });
   });
   it("GET 404: responds with message 'review_id does not exists'", () => {
@@ -190,7 +273,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          msg: "request includes invalid value",
+          msg: "request includes data that cannot be found",
         });
       });
   });
@@ -206,7 +289,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          msg: `Invalid review_id`,
+          msg: "request includes invalid value",
         });
       });
   });
@@ -222,7 +305,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          msg: "request includes invalid value",
+          msg: "request includes data that cannot be found",
         });
       });
   });
