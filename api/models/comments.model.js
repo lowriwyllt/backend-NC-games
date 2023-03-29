@@ -11,3 +11,17 @@ exports.fetchComments = (reviewId) => {
     return response.rows;
   });
 };
+
+exports.insertComment = (review_id, username, body) => {
+  const insertCommentsString = `
+    INSERT INTO comments
+    (review_id, author, body)
+    VALUES ($1, $2, $3)
+    RETURNING *
+    `;
+  return db
+    .query(insertCommentsString, [review_id, username, body])
+    .then((response) => {
+      return response.rows[0];
+    });
+};
