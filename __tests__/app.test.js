@@ -190,7 +190,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          msg: 'input doesn\'t exist : Key (review_id)=(100) is not present in table "reviews".',
+          msg: "request includes invalid value",
         });
       });
   });
@@ -222,7 +222,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body).toMatchObject({
-          msg: 'input doesn\'t exist : Key (author)=(notAValidUser) is not present in table "users".',
+          msg: "request includes invalid value",
         });
       });
   });
