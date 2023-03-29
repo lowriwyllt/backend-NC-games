@@ -13,7 +13,6 @@ exports.fetchComments = (reviewId) => {
 };
 
 exports.insertComment = (review_id, username, body) => {
-  console.log("MODEL");
   const insertCommentsString = `
     INSERT INTO comments
     (review_id, author, body)
@@ -23,7 +22,6 @@ exports.insertComment = (review_id, username, body) => {
   return db
     .query(insertCommentsString, [review_id, username, body])
     .then((response) => {
-      console.log("QUERY");
       return response.rows[0];
     });
 };

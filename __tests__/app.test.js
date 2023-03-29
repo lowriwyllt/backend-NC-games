@@ -178,7 +178,68 @@ describe("/api/reviews/:review_id/comments", () => {
         });
       });
   });
-  // it("POST 404: error if review_id doesn't exist", () => {});
-  // it("POST 400: invalid review_id error", () => {});
-  // it("POST 400: invalid format for a comment", () => {});
+  it("POST 404: error if review_id doesn't exist", () => {
+    const commentObj = {
+      username: "dav3rid",
+      body: "hi this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/reviews/100/comments")
+      .send(commentObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          msg: 'input doesn\'t exist : Key (review_id)=(100) is not present in table "reviews".',
+        });
+      });
+  });
+  it("POST 400: invalid review_id error", () => {
+    const commentObj = {
+      username: "dav3rid",
+      body: "hi this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/reviews/not_a_num/comments")
+      .send(commentObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          msg: `Invalid review_id`,
+        });
+      });
+  });
+  it("POST 404: error if username doesn't exist", () => {
+    const commentObj = {
+      username: "notAValidUser",
+      body: "hi this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send(commentObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          msg: 'input doesn\'t exist : Key (author)=(notAValidUser) is not present in table "users".',
+        });
+      });
+  });
+  it("POST 400: invalid format for a comment", () => {
+    const commentObj = {
+      name: "dav3rid",
+      comment: "hi this is a new comment",
+    };
+
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send(commentObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          msg: "invalid format",
+        });
+      });
+  });
 });

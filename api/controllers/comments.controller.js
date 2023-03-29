@@ -18,20 +18,12 @@ exports.getComments = (req, res, next) => {
 };
 
 exports.postComment = (req, res, next) => {
-  console.log("CONTROLLER");
   const { review_id } = req.params;
   const { username, body } = req.body;
 
-  console.log("id", review_id);
-  console.log("user", username);
-  console.log("body", body);
-
-  Promise.all([
-    insertComment(review_id, username, body),
-    checkColumnExists("reviews", "review_id", review_id),
-  ])
-    .then((result) => {
-      res.status(201).send({ comment: result[0] });
+  insertComment(review_id, username, body)
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch((err) => {
       next(err);
