@@ -7,6 +7,7 @@ const {
 const {
   getReviewById,
   getReviews,
+  patchVotesToReview,
 } = require("./controllers/reviews.controller");
 const { errorPSQL400s, errorCustomised, error500 } = require("./errors");
 
@@ -19,6 +20,7 @@ app.get("/api/reviews/:review_id", getReviewById);
 app.get("/api/reviews", getReviews);
 app.get("/api/reviews/:review_id/comments", getComments);
 app.post("/api/reviews/:review_id/comments", postComment);
+app.patch("/api/reviews/:review_id", patchVotesToReview);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);
