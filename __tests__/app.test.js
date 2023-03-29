@@ -74,12 +74,12 @@ describe("/api/reviews/:review_id", () => {
         expect(body.msg).toBe("request includes invalid value");
       });
   });
-  it("GET 404: responds with message 'Review_id does not exist'", () => {
+  it("GET 404: responds with message 'review_id does not exist'", () => {
     return request(app)
       .get("/api/reviews/0")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Review_id does not exist");
+        expect(body.msg).toBe("review_id does not exist");
       });
   });
   it("PATCH 200: responds with updated review if incrementing by 1", () => {
@@ -145,6 +145,24 @@ describe("/api/reviews/:review_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid format: has invalid properties");
+      });
+  });
+  it("PATCH 404: responds with message 'review_id does not exist'", () => {
+    return request(app)
+      .patch("/api/reviews/0")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("review_id does not exist");
+      });
+  });
+  it("PATCH 400: responds with message 'request includes invalid value'", () => {
+    return request(app)
+      .patch("/api/reviews/not_a_num")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("request includes invalid value");
       });
   });
 });
