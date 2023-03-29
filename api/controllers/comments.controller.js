@@ -1,6 +1,10 @@
-const { user } = require("pg/lib/defaults");
+// const { user } = require("pg/lib/defaults");
 const { checkColumnExists } = require("../app-utils");
-const { fetchComments, insertComment } = require("../models/comments.model");
+const {
+  fetchComments,
+  insertComment,
+  removeAComment,
+} = require("../models/comments.model");
 
 exports.getComments = (req, res, next) => {
   const { review_id } = req.params;
@@ -28,4 +32,14 @@ exports.postComment = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.deleteAComment = (req, res, next) => {
+  const { comment_id } = req.params;
+
+  removeAComment(comment_id)
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((err) => next(err));
 };

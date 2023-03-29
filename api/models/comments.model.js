@@ -25,3 +25,12 @@ exports.insertComment = (review_id, username, body) => {
       return response.rows[0];
     });
 };
+
+exports.removeAComment = (commentId) => {
+  const deleteCommentStr = `
+  DELETE FROM comments
+  WHERE comment_id = $1`;
+  return db.query(deleteCommentStr, [commentId]).then((response) => {
+    return response.rows;
+  });
+};
