@@ -1,4 +1,5 @@
 const express = require("express");
+const { getApi } = require("./controllers/api.controller");
 const { getCategories } = require("./controllers/categories.controller");
 const {
   getComments,
@@ -25,6 +26,7 @@ app.post("/api/reviews/:review_id/comments", postComment);
 app.patch("/api/reviews/:review_id", patchVotesToReview);
 app.delete("/api/comments/:comment_id", deleteAComment);
 app.get("/api/users", getUsers);
+app.get("/api", getApi);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);
