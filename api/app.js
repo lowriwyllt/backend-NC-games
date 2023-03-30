@@ -1,32 +1,20 @@
 const express = require("express");
-const { getApi } = require("./controllers/api.controller");
-const { getCategories } = require("./controllers/categories.controller");
-const {
-  getComments,
-  postComment,
-  deleteAComment,
-} = require("./controllers/comments.controller");
-const {
-  getReviewById,
-  getReviews,
-  patchVotesToReview,
-} = require("./controllers/reviews.controller");
-const { getUsers } = require("./controllers/users.controller");
-const { errorPSQL400s, errorCustomised, error500 } = require("./errors");
-
 const app = express();
 
-app.use(express.json());
+const apiRouter = require("./routes/api-router");
+const categoriesRouter = require("./routes/categories-router");
+const reviewsRouter = require("./routes/reviews-router");
+const commentsRouter = require("./routes/comments-router");
+const usersRouter = require("./routes/users-router");
 
-app.get("/api/categories", getCategories);
-app.get("/api/reviews/:review_id", getReviewById);
-app.get("/api/reviews", getReviews);
-app.get("/api/reviews/:review_id/comments", getComments);
-app.post("/api/reviews/:review_id/comments", postComment);
-app.patch("/api/reviews/:review_id", patchVotesToReview);
-app.delete("/api/comments/:comment_id", deleteAComment);
-app.get("/api/users", getUsers);
-app.get("/api", getApi);
+const { errorPSQL400s, errorCustomised, error500 } = require("./errors");
+
+app.use(express.json());
+app.use("/api", apiRouter);
+app.use("/api/categories", categoriesRouter);
+app.use("/api/reviews", reviewsRouter);
+app.use("/api/comments", commentsRouter);
+app.use("/api/users", usersRouter);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);
