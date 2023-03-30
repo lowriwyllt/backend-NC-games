@@ -10,6 +10,7 @@ const {
   getReviews,
   patchVotesToReview,
 } = require("./controllers/reviews.controller");
+const { getUsers } = require("./controllers/users.controller");
 const { errorPSQL400s, errorCustomised, error500 } = require("./errors");
 
 const app = express();
@@ -23,6 +24,7 @@ app.get("/api/reviews/:review_id/comments", getComments);
 app.post("/api/reviews/:review_id/comments", postComment);
 app.patch("/api/reviews/:review_id", patchVotesToReview);
 app.delete("/api/comments/:comment_id", deleteAComment);
+app.get("/api/users", getUsers);
 
 app.use(errorPSQL400s);
 app.use(errorCustomised);

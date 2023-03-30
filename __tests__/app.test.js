@@ -364,3 +364,24 @@ describe("/api/comments/:comment_id", () => {
     });
   });
 });
+
+describe("/api/users", () => {
+  describe("GET", () => {
+    it("GET 200: repond with array of users objecrs", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.users).toBeInstanceOf(Array);
+          expect(body.users).toHaveLength(testData.userData.length);
+          body.users.forEach((user) => {
+            expect(user).toMatchObject({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            });
+          });
+        });
+    });
+  });
+});
