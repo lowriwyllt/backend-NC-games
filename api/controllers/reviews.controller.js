@@ -20,9 +20,17 @@ exports.getReviewById = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-  fetchReviews()
-    .then((reviews) => {
-      res.status(200).send({ reviews });
+  const { category, sort_by, order } = req.query;
+
+  const promiseArr = [fetchReviews(category, sort_by, order)];
+
+  if (category) {
+    promiseArr.push(checkColumnExists("categories", "slug", category));
+  }
+
+  Promise.all(promiseArr)
+    .then((result) => {
+      res.status(200).send({ reviews: result[0] });
     })
     .catch((err) => {
       next(err);

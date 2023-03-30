@@ -199,6 +199,179 @@ describe("/api/reviews", () => {
           });
         });
     });
+    describe("QUERIES", () => {
+      describe("category query", () => {
+        it("GET 200: responds with array of reviews by category ", () => {
+          const socialDeductionData = testData.reviewData.filter(
+            (review) => review.category === "social deduction"
+          );
+          return request(app)
+            .get("/api/reviews?category=social+deduction")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(socialDeductionData.length);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: "social deduction",
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 404: if category does not exist", () => {
+          return request(app)
+            .get("/api/reviews?category=not+a+category")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("slug does not exist");
+            });
+        });
+        it("GET 200: responds with empty array if no reviews in that category yet", () => {
+          return request(app)
+            .get("/api/reviews?category=children's+games")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toEqual([]);
+            });
+        });
+      });
+      describe("sort_by query", () => {
+        it("GET 200: responds with array of reviews ordered by valid column", () => {
+          return request(app)
+            .get("/api/reviews?sort_by=owner")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(testData.reviewData.length);
+              expect(body.reviews).toBeSortedBy("owner", { descending: true });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 400: if not a valid column", () => {
+          return request(app)
+            .get("/api/reviews?sort_by=not_a_column")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid sort_by query");
+            });
+        });
+      });
+      describe("order query", () => {
+        it("GET 200: responds with array of reviews ordered ascending", () => {
+          return request(app)
+            .get("/api/reviews?order=asc")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(testData.reviewData.length);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: false,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 200: responds with array of reviews ordered descending", () => {
+          return request(app)
+            .get("/api/reviews?order=desc")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(testData.reviewData.length);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 400: if not a valid query", () => {
+          return request(app)
+            .get("/api/reviews?order=not_valid")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid order query");
+            });
+        });
+      });
+      describe("Multiple queries", () => {
+        it("GET 200: responds when multiple queries called", () => {
+          const socialDeductionData = testData.reviewData.filter(
+            (review) => review.category === "social deduction"
+          );
+          return request(app)
+            .get(
+              "/api/reviews?category=social+deduction&sort_by=owner&order=asc"
+            )
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(socialDeductionData.length);
+              expect(body.reviews).toBeSortedBy("owner", {
+                descending: false,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: "social deduction",
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+      });
+    });
   });
 });
 
