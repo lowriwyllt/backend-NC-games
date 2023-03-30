@@ -66,6 +66,7 @@ describe("/api/reviews/:review_id", () => {
             category: "dexterity",
             created_at: expect.any(String), //can't check for the exact date
             votes: 5,
+            comment_count: 3,
           });
         });
     });
