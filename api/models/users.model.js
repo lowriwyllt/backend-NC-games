@@ -8,3 +8,13 @@ exports.fetchUsers = () => {
     return response.rows;
   });
 };
+
+exports.fetchUser = (username) => {
+  const selectUserStr = `
+  SELECT * 
+  FROM users
+  WHERE username = $1`;
+  return db.query(selectUserStr, [username]).then((response) => {
+    return response.rows[0];
+  });
+};
