@@ -1,9 +1,9 @@
-// const { user } = require("pg/lib/defaults");
 const { checkColumnExists } = require("../app-utils");
 const {
   fetchComments,
   insertComment,
   removeAComment,
+  addVotesToComment,
 } = require("../models/comments.model");
 
 exports.getComments = (req, res, next) => {
@@ -43,6 +43,20 @@ exports.deleteAComment = (req, res, next) => {
     })
     .then(() => {
       res.sendStatus(204);
+    })
+    .catch((err) => next(err));
+};
+
+exports.patchAComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+
+  Promise.all([
+    addVotesToComment(comment_id, inc_votes, req.body),
+    checkColumnExists("comments", "comment_id", comment_id),
+  ])
+    .then((result) => {
+      res.status(200).send({ comment: result[0] });
     })
     .catch((err) => next(err));
 };
