@@ -556,6 +556,83 @@ describe("/api/comments/:comment_id", () => {
         });
     });
   });
+  describe("PATCH", () => {
+    it("PATCH 200: respond with the updated comment - incrementing", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            body: "I didn't know dogs could play games",
+            votes: 11,
+            author: "philippaclaire9",
+            review_id: 3,
+            created_at: expect.any(String),
+          });
+        });
+    });
+    it("PATCH 200: respond with the updated comment - decrementing", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({ inc_votes: -1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            body: "I didn't know dogs could play games",
+            votes: 9,
+            author: "philippaclaire9",
+            review_id: 3,
+            created_at: expect.any(String),
+          });
+        });
+    });
+    it("PATCH 400: if no inc_votes on request body responds with error ", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({ votessss: -1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid format: has invalid properties");
+        });
+    });
+    it("PATCH 400: if inc_votes is NaN", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({ inc_votes: "not_a_num" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+    it("PATCH 400: has another property on request body", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({ inc_votes: 1, username: "name" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid format: has invalid properties");
+        });
+    });
+    it("PATCH 404: comment_id does not exists", () => {
+      return request(app)
+        .patch("/api/comments/0")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("comment_id does not exist");
+        });
+    });
+    it("PATCH 400: comment_id is an invalid value", () => {
+      return request(app)
+        .patch("/api/comments/not_a_num")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+  });
 });
 
 describe("/api/users", () => {
