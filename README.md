@@ -41,5 +41,5 @@ To run the tests and check everything is working as it should, run `npm test` in
 The minimum versions to run this project:
 | Package | Version |
 | -------- | ------- |
-| Node.js | 9.4.0 |
-| Postgres | 1.0.4 |
+| Node.js | 19.6.0 |
+| Postgres | 14.7 |
