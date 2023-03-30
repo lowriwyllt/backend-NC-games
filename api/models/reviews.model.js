@@ -2,9 +2,21 @@ const db = require("../../db/connection");
 
 exports.fetchReviewById = (review_id) => {
   const selectReviewString = `
-      SELECT *
-      FROM reviews
-      WHERE review_id = $1
+    SELECT reviews.review_id, 
+    reviews.title, 
+    reviews.review_body,
+    reviews.designer, 
+    reviews.review_img_url, 
+    reviews.votes,   
+    reviews.category, 
+    reviews.owner, 
+    reviews.created_at, 
+    CAST(COUNT(comments.comment_id) AS INT) AS comment_count
+    FROM reviews
+    LEFT JOIN comments
+    ON comments.review_id = reviews.review_id
+    WHERE reviews.review_id = $1
+    GROUP BY reviews.review_id
       `;
   return db.query(selectReviewString, [review_id]).then((response) => {
     return response.rows[0];
