@@ -2,6 +2,7 @@ const {
   fetchReviewById,
   fetchReviews,
   addVotes,
+  insertReview,
 } = require("../models/reviews.model");
 const { checkColumnExists } = require("../app-utils");
 
@@ -51,4 +52,14 @@ exports.patchVotesToReview = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.postReview = (req, res, next) => {
+  const { owner, title, review_body, designer, category, review_img_url } =
+    req.body;
+  insertReview(owner, title, review_body, designer, category, review_img_url)
+    .then((review) => {
+      res.status(201).send({ review });
+    })
+    .catch((err) => next(err));
 };

@@ -393,6 +393,37 @@ describe("/api/reviews", () => {
       });
     });
   });
+  describe("POST", () => {
+    it("POST 201: responds with posted review ", () => {
+      const reviewsObj = {
+        owner: "mallionaire",
+        title: "title of review",
+        review_body: "review body",
+        designer: "designer",
+        category: "social deduction",
+        review_img_url: "www.review_image_url.co.uk",
+      };
+
+      return request(app)
+        .post("/api/reviews/")
+        .send(reviewsObj)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.review).toMatchObject({
+            owner: "mallionaire",
+            title: "title of review",
+            review_body: "review body",
+            designer: "designer",
+            category: "social deduction",
+            review_img_url: "www.review_image_url.co.uk",
+            review_id: expect.any(Number),
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0,
+          });
+        });
+    });
+  });
 });
 
 describe("/api/reviews/:review_id/comments", () => {
