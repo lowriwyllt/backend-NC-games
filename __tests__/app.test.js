@@ -222,6 +222,27 @@ describe("/api/reviews/:review_id", () => {
         });
     });
   });
+  describe("DELETE", () => {
+    it("DELETE 204: returns no content after deleting ", () => {
+      return request(app).delete("/api/reviews/1").expect(204);
+    });
+    it("DELETE 404: review_id not found", () => {
+      return request(app)
+        .delete("/api/reviews/0")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("review_id does not exist");
+        });
+    });
+    it("DELETE 400: not a valid review_id", () => {
+      return request(app)
+        .delete("/api/reviews/not_a_num")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+  });
 });
 
 describe("/api/reviews", () => {

@@ -146,3 +146,10 @@ exports.insertReview = (
       return response.rows[0];
     });
 };
+
+exports.removeACategory = (reviewId) => {
+  const deleteCategoryStr = `
+  DELETE FROM reviews
+  WHERE review_id = $1`;
+  return db.query(deleteCategoryStr, [reviewId]);
+};
