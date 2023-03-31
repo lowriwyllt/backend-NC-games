@@ -85,3 +85,52 @@ exports.addVotes = (review_id, inc_votes, body) => {
       return response.rows[0];
     });
 };
+
+exports.insertReview = (
+  owner,
+  title,
+  review_body,
+  designer,
+  category,
+  review_img_url
+) => {
+  // const insertReviewStr = `
+  // WITH new_rows AS (
+  //   INSERT INTO reviews
+  //   (owner, title, review_body, designer, category, review_img_url)
+  //   VALUES ($1, $2, $3, $4, $5, $6)
+  //   RETURNING *
+  // )
+  // SELECT reviews.*, COUNT(comments.comment_id) AS comment_count
+  // FROM comments
+  // RIGHT JOIN comments
+  //   ON comments.review_id = reviews.review_id
+  // WHERE comments.review_id = (SELECT review_id FROM new_rows);
+  // `;
+  const insertReviewStr = `WITH new_review AS (
+    INSERT INTO reviews
+    (owner, title, review_body, designer, category, review_img_url)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *
+  ),
+  comment_count AS (
+    SELECT CAST(COUNT(*) AS INT) AS count
+    FROM comments
+    WHERE review_id = (SELECT review_id FROM new_review)
+  )
+  SELECT new_review.*, comment_count.count AS comment_count
+  FROM new_review, comment_count;`;
+
+  return db
+    .query(insertReviewStr, [
+      owner,
+      title,
+      review_body,
+      designer,
+      category,
+      review_img_url,
+    ])
+    .then((response) => {
+      return response.rows[0];
+    });
+};
