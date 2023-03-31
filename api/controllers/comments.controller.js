@@ -8,9 +8,10 @@ const {
 
 exports.getComments = (req, res, next) => {
   const { review_id } = req.params;
+  const { limit, p } = req.query;
 
   Promise.all([
-    fetchComments(review_id),
+    fetchComments(review_id, limit, p),
     checkColumnExists("reviews", "review_id", review_id),
   ])
     .then((result) => {

@@ -559,7 +559,7 @@ describe("/api/reviews", () => {
               expect(body.msg).toBe("p (page) not found");
             });
         });
-        it("GET 404: negative number or zero for limit", () => {
+        it("GET 404: negative number or zero for p", () => {
           return request(app)
             .get("/api/reviews?p=-1")
             .expect(400)
@@ -668,7 +668,7 @@ describe("/api/reviews/:review_id/comments", () => {
           expect(body.comments).toBeSortedBy("created_at", {
             descending: true,
           });
-          expect(body.comments.length > 0).toBe(true);
+          expect(body.comments).toHaveLength(3);
           body.comments.forEach((comment) => {
             expect(comment).toMatchObject({
               comment_id: expect.any(Number),
@@ -705,6 +705,100 @@ describe("/api/reviews/:review_id/comments", () => {
         .then(({ body }) => {
           expect(body.msg).toBe("review_id does not exist");
         });
+    });
+    describe("Refactoring for pagination", () => {
+      it("GET 200: limit query only gives limit amount of response in array ", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?limit=2")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comments).toBeInstanceOf(Array);
+            expect(body.comments).toBeSortedBy("created_at", {
+              descending: true,
+            });
+            expect(body.comments[0]).toEqual({
+              comment_id: 6,
+              body: "Not sure about dogs, but my cat likes to get involved with board games, the boxes are their particular favourite",
+              review_id: 3,
+              author: "philippaclaire9",
+              votes: 10,
+              created_at: "2021-03-27T19:49:48.110Z",
+            });
+            expect(body.comments).toHaveLength(2);
+            body.comments.forEach((comment) => {
+              expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                review_id: expect.any(Number),
+              });
+            });
+          });
+      });
+      it("GET 200: p for the page to to start on", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?limit=2&p=2")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comments).toBeInstanceOf(Array);
+            expect(body.comments).toBeSortedBy("created_at", {
+              descending: true,
+            });
+            expect(body.comments[0]).toEqual({
+              comment_id: 2,
+              body: "My dog loved this game too!",
+              review_id: 3,
+              author: "mallionaire",
+              votes: 13,
+              created_at: "2021-01-18T10:09:05.410Z",
+            });
+            expect(body.comments).toHaveLength(1);
+            body.comments.forEach((comment) => {
+              expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                review_id: expect.any(Number),
+              });
+            });
+          });
+      });
+      it("GET 400: limit is NaN", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?limit=not_a_num")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("invalid limit query");
+          });
+      });
+      it("GET 400: negative number or zero for limit", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?limit=-1")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("invalid limit query");
+          });
+      });
+      it("GET 400: p is NaN", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?p=not_a_num")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("invalid p (page) query");
+          });
+      });
+      it("GET 404: negative number or zero for limit ", () => {
+        return request(app)
+          .get("/api/reviews/3/comments?p=-1")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("invalid p (page) query");
+          });
+      });
     });
   });
   describe("POST", () => {
