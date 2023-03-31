@@ -3,6 +3,7 @@ const {
   fetchReviews,
   addVotes,
   insertReview,
+  removeACategory,
 } = require("../models/reviews.model");
 const { checkColumnExists } = require("../app-utils");
 
@@ -64,6 +65,19 @@ exports.postReview = (req, res, next) => {
   insertReview(owner, title, review_body, designer, category, review_img_url)
     .then((review) => {
       res.status(201).send({ review });
+    })
+    .catch((err) => next(err));
+};
+
+exports.deleteACategory = (req, res, next) => {
+  const { review_id } = req.params;
+
+  checkColumnExists("reviews", "review_id", review_id)
+    .then(() => {
+      removeACategory(review_id);
+    })
+    .then(() => {
+      res.sendStatus(204);
     })
     .catch((err) => next(err));
 };
