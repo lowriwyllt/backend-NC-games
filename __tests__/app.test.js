@@ -197,12 +197,14 @@ describe("/api/reviews", () => {
   describe("GET", () => {
     it("GET 200: responds with an array of all the reviews, that are ordered by 'created_at' in descending order", () => {
       return request(app)
-        .get("/api/reviews")
+        .get("/api/reviews?limit=100") //add limit so it still passes old tests when default limit is 10
         .expect(200)
         .then(({ body }) => {
           expect(body.reviews).toBeInstanceOf(Array);
           expect(body.reviews).toHaveLength(testData.reviewData.length);
-          expect(body.reviews).toBeSortedBy("created_at", { descending: true });
+          expect(body.reviews).toBeSortedBy("created_at", {
+            descending: true,
+          });
           body.reviews.forEach((review) => {
             expect(review).toBeInstanceOf(Object);
             expect(review).toMatchObject({
@@ -226,7 +228,7 @@ describe("/api/reviews", () => {
             (review) => review.category === "social deduction"
           );
           return request(app)
-            .get("/api/reviews?category=social+deduction")
+            .get("/api/reviews?category=social+deduction&limit=100") //add limit so it still passes old tests when default limit is 10")
             .expect(200)
             .then(({ body }) => {
               expect(body.reviews).toBeInstanceOf(Array);
@@ -269,7 +271,7 @@ describe("/api/reviews", () => {
       describe("sort_by query", () => {
         it("GET 200: responds with array of reviews ordered by valid column", () => {
           return request(app)
-            .get("/api/reviews?sort_by=owner")
+            .get("/api/reviews?sort_by=owner&limit=100") //add limit so it still passes old tests when default limit is 10
             .expect(200)
             .then(({ body }) => {
               expect(body.reviews).toBeInstanceOf(Array);
@@ -302,7 +304,7 @@ describe("/api/reviews", () => {
       describe("order query", () => {
         it("GET 200: responds with array of reviews ordered ascending", () => {
           return request(app)
-            .get("/api/reviews?order=asc")
+            .get("/api/reviews?order=asc&limit=100") //add limit so it still passes old tests when default limit is 10
             .expect(200)
             .then(({ body }) => {
               expect(body.reviews).toBeInstanceOf(Array);
@@ -327,7 +329,7 @@ describe("/api/reviews", () => {
         });
         it("GET 200: responds with array of reviews ordered descending", () => {
           return request(app)
-            .get("/api/reviews?order=desc")
+            .get("/api/reviews?order=desc&limit=100") //add limit so it still passes old tests when default limit is 10
             .expect(200)
             .then(({ body }) => {
               expect(body.reviews).toBeInstanceOf(Array);
@@ -366,8 +368,8 @@ describe("/api/reviews", () => {
           );
           return request(app)
             .get(
-              "/api/reviews?category=social+deduction&sort_by=owner&order=asc"
-            )
+              "/api/reviews?category=social+deduction&sort_by=owner&order=asc&limit=100"
+            ) //add limit so it still passes old tests when default limit is 10
             .expect(200)
             .then(({ body }) => {
               expect(body.reviews).toBeInstanceOf(Array);
@@ -388,6 +390,181 @@ describe("/api/reviews", () => {
                   comment_count: expect.any(Number),
                 });
               });
+            });
+        });
+      });
+      describe("Refactoring for pagination", () => {
+        it("GET 200: limit query only gives limit amount of response in array", () => {
+          return request(app)
+            .get("/api/reviews?limit=5")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(5);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              expect(body.reviews[0]).toEqual({
+                owner: "mallionaire",
+                title: "Mollit elit qui incididunt veniam occaecat cupidatat",
+                review_id: 7,
+                category: "social deduction",
+                review_img_url:
+                  "https://images.pexels.com/photos/776657/pexels-photo-776657.jpeg?w=700&h=700",
+                created_at: "2021-01-25T11:16:54.963Z",
+                votes: 9,
+                designer: "Avery Wunzboogerz",
+                comment_count: 0,
+              });
+
+              body.reviews.forEach((review) => {
+                expect(review).toBeInstanceOf(Object);
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 200: p for the page to to start on ", () => {
+          return request(app)
+            .get("/api/reviews?p=2")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(3);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              expect(body.reviews[0]).toEqual({
+                owner: "mallionaire",
+                title: "Proident tempor et.",
+                review_id: 5,
+                category: "social deduction",
+                review_img_url:
+                  "https://images.pexels.com/photos/209728/pexels-photo-209728.jpeg?w=700&h=700",
+                created_at: "2021-01-07T09:06:08.077Z",
+                votes: 5,
+                designer: "Seymour Buttz",
+                comment_count: 0,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toBeInstanceOf(Object);
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 200: refactoring to also give back a total_count with all total number of reveiws", () => {
+          return request(app)
+            .get("/api/reviews")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.reviews).toHaveLength(10);
+              expect(body.total_count).toBe(testData.reviewData.length);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toBeInstanceOf(Object);
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 200: refactoring to also give back a total_count with all total number of reveiws of a category", () => {
+          const socialDeductionData = testData.reviewData.filter(
+            (review) => review.category === "social deduction"
+          );
+          return request(app)
+            .get("/api/reviews?category=social+deduction") //add limit so it still passes old tests when default limit is 10")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.reviews).toBeInstanceOf(Array);
+              expect(body.total_count).toBe(socialDeductionData.length);
+              expect(body.reviews).toHaveLength(10);
+              expect(body.reviews).toBeSortedBy("created_at", {
+                descending: true,
+              });
+              body.reviews.forEach((review) => {
+                expect(review).toMatchObject({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: "social deduction",
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number),
+                });
+              });
+            });
+        });
+        it("GET 400: limit is NaN", () => {
+          return request(app)
+            .get("/api/reviews?limit=not_a_num")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid limit query");
+            });
+        });
+        it("GET 400: negative number or zero for limit", () => {
+          return request(app)
+            .get("/api/reviews?limit=-2")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid limit query");
+            });
+        });
+        it("GET 400: p is NaN", () => {
+          return request(app)
+            .get("/api/reviews?p=not_a_num")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid p (page) query");
+            });
+        });
+        it("GET 404: if p greater than the amount of pages", () => {
+          return request(app)
+            .get("/api/reviews?p=3")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("p (page) not found");
+            });
+        });
+        it("GET 404: negative number or zero for limit", () => {
+          return request(app)
+            .get("/api/reviews?p=-1")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("invalid p (page) query");
             });
         });
       });

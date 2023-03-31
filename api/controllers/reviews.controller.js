@@ -21,17 +21,21 @@ exports.getReviewById = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-  const { category, sort_by, order } = req.query;
+  const { category, sort_by, order, limit, p } = req.query;
 
-  const promiseArr = [fetchReviews(category, sort_by, order)];
+  const promiseArr = [fetchReviews(category, sort_by, order, limit, p)];
 
   if (category) {
     promiseArr.push(checkColumnExists("categories", "slug", category));
   }
-
   Promise.all(promiseArr)
     .then((result) => {
-      res.status(200).send({ reviews: result[0] });
+      const reviews = result[0][1];
+      const total_count = result[0][0].count;
+      if (reviews.length === 0 && total_count > 0) {
+        return Promise.reject({ status: 404, msg: "p (page) not found" });
+      }
+      res.status(200).send({ total_count, reviews });
     })
     .catch((err) => {
       next(err);
