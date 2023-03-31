@@ -8,6 +8,7 @@ beforeEach(() => seed(testData));
 
 afterAll(() => db.end());
 
+//INVALID PATHS
 describe("Handles invalid paths", () => {
   it("GET 404: responds with an error message that the path doesn't exist, when given wrong path", () => {
     return request(app)
@@ -27,6 +28,37 @@ describe("Handles invalid paths", () => {
   });
 });
 
+//GENERAL
+describe("/api", () => {
+  describe("GET", () => {
+    it("GET 200: respond with JSON data for all the endpoints ", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.endpoints).toHaveProperty("GET /api");
+          expect(body.endpoints).toHaveProperty("GET /api/categories");
+          expect(body.endpoints).toHaveProperty("GET /api/reviews");
+          expect(body.endpoints).toHaveProperty("GET /api/reviews/:review_id");
+          expect(body.endpoints).toHaveProperty(
+            "PATCH /api/reviews/:review_id"
+          );
+          expect(body.endpoints).toHaveProperty(
+            "GET /api/reviews/:review_id/comments"
+          );
+          expect(body.endpoints).toHaveProperty(
+            "POST /api/reviews/:review_id/comments"
+          );
+          expect(body.endpoints).toHaveProperty(
+            "DELETE /api/comments/:comment_id"
+          );
+          expect(body.endpoints).toHaveProperty("GET /api/users");
+        });
+    });
+  });
+});
+
+//CATEGORIES
 describe("/api/categories", () => {
   describe("GET", () => {
     it("GET 200: respond with array of category objects ", () => {
@@ -79,172 +111,7 @@ describe("/api/categories", () => {
   });
 });
 
-describe("/api/reviews/:review_id", () => {
-  describe("GET", () => {
-    it("GET 200: responds with the review with review_id", () => {
-      return request(app)
-        .get("/api/reviews/2")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.review).toMatchObject({
-            review_id: 2,
-            title: "Jenga",
-            designer: "Leslie Scott",
-            owner: "philippaclaire9",
-            review_img_url:
-              "https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700",
-            review_body: "Fiddly fun for all the family",
-            category: "dexterity",
-            created_at: expect.any(String), //can't check for the exact date
-            votes: 5,
-          });
-        });
-    });
-    it("GET 400: responds with message 'request includes invalid value'", () => {
-      return request(app)
-        .get("/api/reviews/not_a_num")
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("request includes invalid value");
-        });
-    });
-    it("GET 404: responds with message 'review_id does not exist'", () => {
-      return request(app)
-        .get("/api/reviews/0")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe("review_id does not exist");
-        });
-    });
-    it("GET 200: respond with the review including comment_count", () => {
-      return request(app)
-        .get("/api/reviews/2")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.review).toMatchObject({
-            review_id: 2,
-            title: "Jenga",
-            designer: "Leslie Scott",
-            owner: "philippaclaire9",
-            review_img_url:
-              "https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700",
-            review_body: "Fiddly fun for all the family",
-            category: "dexterity",
-            created_at: expect.any(String), //can't check for the exact date
-            votes: 5,
-            comment_count: 3,
-          });
-        });
-    });
-  });
-  describe("PATCH", () => {
-    it("PATCH 200: responds with updated review if incrementing by 1", () => {
-      return request(app)
-        .patch("/api/reviews/1")
-        .send({ inc_votes: 1 })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.review).toMatchObject({
-            title: "Agricola",
-            designer: "Uwe Rosenberg",
-            owner: "mallionaire",
-            review_img_url:
-              "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
-            review_body: "Farmyard fun!",
-            category: "euro game",
-            created_at: expect.any(String),
-            votes: 2,
-          });
-        });
-    });
-    it("PATCH 200: responds with updated review if decrementing by 1", () => {
-      return request(app)
-        .patch("/api/reviews/1")
-        .send({ inc_votes: -1 })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.review).toMatchObject({
-            title: "Agricola",
-            designer: "Uwe Rosenberg",
-            owner: "mallionaire",
-            review_img_url:
-              "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
-            review_body: "Farmyard fun!",
-            category: "euro game",
-            created_at: expect.any(String),
-            votes: 0,
-          });
-        });
-    });
-    it("PATCH 400: if no inc_votes on request body responds with error ", () => {
-      return request(app)
-        .patch("/api/reviews/1")
-        .send({ votessss: -1 })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("Invalid format: has invalid properties");
-        });
-    });
-    it("PATCH 400: if inc_votes NaN", () => {
-      return request(app)
-        .patch("/api/reviews/1")
-        .send({ inc_votes: "not_a_num" })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("request includes invalid value");
-        });
-    });
-    it("PATCH 400: has another property on request body", () => {
-      return request(app)
-        .patch("/api/reviews/1")
-        .send({ inc_votes: 1, my_name: "name" })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("Invalid format: has invalid properties");
-        });
-    });
-    it("PATCH 404: responds with message 'review_id does not exist'", () => {
-      return request(app)
-        .patch("/api/reviews/0")
-        .send({ inc_votes: 1 })
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe("review_id does not exist");
-        });
-    });
-    it("PATCH 400: responds with message 'request includes invalid value'", () => {
-      return request(app)
-        .patch("/api/reviews/not_a_num")
-        .send({ inc_votes: 1 })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("request includes invalid value");
-        });
-    });
-  });
-  describe("DELETE", () => {
-    it("DELETE 204: returns no content after deleting ", () => {
-      return request(app).delete("/api/reviews/1").expect(204);
-    });
-    it("DELETE 404: review_id not found", () => {
-      return request(app)
-        .delete("/api/reviews/0")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe("review_id does not exist");
-        });
-    });
-    it("DELETE 400: not a valid review_id", () => {
-      return request(app)
-        .delete("/api/reviews/not_a_num")
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("request includes invalid value");
-        });
-    });
-  });
-});
-
+//REVIEWS
 describe("/api/reviews", () => {
   describe("GET", () => {
     it("GET 200: responds with an array of all the reviews, that are ordered by 'created_at' in descending order", () => {
@@ -709,6 +576,172 @@ describe("/api/reviews", () => {
   });
 });
 
+describe("/api/reviews/:review_id", () => {
+  describe("GET", () => {
+    it("GET 200: responds with the review with review_id", () => {
+      return request(app)
+        .get("/api/reviews/2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.review).toMatchObject({
+            review_id: 2,
+            title: "Jenga",
+            designer: "Leslie Scott",
+            owner: "philippaclaire9",
+            review_img_url:
+              "https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700",
+            review_body: "Fiddly fun for all the family",
+            category: "dexterity",
+            created_at: expect.any(String), //can't check for the exact date
+            votes: 5,
+          });
+        });
+    });
+    it("GET 400: responds with message 'request includes invalid value'", () => {
+      return request(app)
+        .get("/api/reviews/not_a_num")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+    it("GET 404: responds with message 'review_id does not exist'", () => {
+      return request(app)
+        .get("/api/reviews/0")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("review_id does not exist");
+        });
+    });
+    it("GET 200: respond with the review including comment_count", () => {
+      return request(app)
+        .get("/api/reviews/2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.review).toMatchObject({
+            review_id: 2,
+            title: "Jenga",
+            designer: "Leslie Scott",
+            owner: "philippaclaire9",
+            review_img_url:
+              "https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700",
+            review_body: "Fiddly fun for all the family",
+            category: "dexterity",
+            created_at: expect.any(String), //can't check for the exact date
+            votes: 5,
+            comment_count: 3,
+          });
+        });
+    });
+  });
+  describe("PATCH", () => {
+    it("PATCH 200: responds with updated review if incrementing by 1", () => {
+      return request(app)
+        .patch("/api/reviews/1")
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.review).toMatchObject({
+            title: "Agricola",
+            designer: "Uwe Rosenberg",
+            owner: "mallionaire",
+            review_img_url:
+              "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+            review_body: "Farmyard fun!",
+            category: "euro game",
+            created_at: expect.any(String),
+            votes: 2,
+          });
+        });
+    });
+    it("PATCH 200: responds with updated review if decrementing by 1", () => {
+      return request(app)
+        .patch("/api/reviews/1")
+        .send({ inc_votes: -1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.review).toMatchObject({
+            title: "Agricola",
+            designer: "Uwe Rosenberg",
+            owner: "mallionaire",
+            review_img_url:
+              "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+            review_body: "Farmyard fun!",
+            category: "euro game",
+            created_at: expect.any(String),
+            votes: 0,
+          });
+        });
+    });
+    it("PATCH 400: if no inc_votes on request body responds with error ", () => {
+      return request(app)
+        .patch("/api/reviews/1")
+        .send({ votessss: -1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid format: has invalid properties");
+        });
+    });
+    it("PATCH 400: if inc_votes NaN", () => {
+      return request(app)
+        .patch("/api/reviews/1")
+        .send({ inc_votes: "not_a_num" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+    it("PATCH 400: has another property on request body", () => {
+      return request(app)
+        .patch("/api/reviews/1")
+        .send({ inc_votes: 1, my_name: "name" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid format: has invalid properties");
+        });
+    });
+    it("PATCH 404: responds with message 'review_id does not exist'", () => {
+      return request(app)
+        .patch("/api/reviews/0")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("review_id does not exist");
+        });
+    });
+    it("PATCH 400: responds with message 'request includes invalid value'", () => {
+      return request(app)
+        .patch("/api/reviews/not_a_num")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+  });
+  describe("DELETE", () => {
+    it("DELETE 204: returns no content after deleting ", () => {
+      return request(app).delete("/api/reviews/1").expect(204);
+    });
+    it("DELETE 404: review_id not found", () => {
+      return request(app)
+        .delete("/api/reviews/0")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("review_id does not exist");
+        });
+    });
+    it("DELETE 400: not a valid review_id", () => {
+      return request(app)
+        .delete("/api/reviews/not_a_num")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes invalid value");
+        });
+    });
+  });
+});
+
 describe("/api/reviews/:review_id/comments", () => {
   describe("GET", () => {
     it("GET 200: respond with array of comments for the inputted review_id ", () => {
@@ -942,6 +975,7 @@ describe("/api/reviews/:review_id/comments", () => {
   });
 });
 
+//COMMENTS
 describe("/api/comments/:comment_id", () => {
   describe("DELETE", () => {
     it("DELETE 204: responds no content", () => {
@@ -1043,6 +1077,7 @@ describe("/api/comments/:comment_id", () => {
   });
 });
 
+//USERS
 describe("/api/users", () => {
   describe("GET", () => {
     it("GET 200: repond with array of users objecrs", () => {
@@ -1059,35 +1094,6 @@ describe("/api/users", () => {
               avatar_url: expect.any(String),
             });
           });
-        });
-    });
-  });
-});
-
-describe("/api", () => {
-  describe("GET", () => {
-    it("GET 200: respond with JSON data for all the endpoints ", () => {
-      return request(app)
-        .get("/api")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.endpoints).toHaveProperty("GET /api");
-          expect(body.endpoints).toHaveProperty("GET /api/categories");
-          expect(body.endpoints).toHaveProperty("GET /api/reviews");
-          expect(body.endpoints).toHaveProperty("GET /api/reviews/:review_id");
-          expect(body.endpoints).toHaveProperty(
-            "PATCH /api/reviews/:review_id"
-          );
-          expect(body.endpoints).toHaveProperty(
-            "GET /api/reviews/:review_id/comments"
-          );
-          expect(body.endpoints).toHaveProperty(
-            "POST /api/reviews/:review_id/comments"
-          );
-          expect(body.endpoints).toHaveProperty(
-            "DELETE /api/comments/:comment_id"
-          );
-          expect(body.endpoints).toHaveProperty("GET /api/users");
         });
     });
   });
