@@ -600,6 +600,60 @@ describe("/api/reviews", () => {
           });
         });
     });
+    it("POST 404: owner's username does not exists", () => {
+      const reviewsObj = {
+        owner: "not_a_username",
+        title: "title of review",
+        review_body: "review body",
+        designer: "designer",
+        category: "social deduction",
+        review_img_url: "www.review_image_url.co.uk",
+      };
+
+      return request(app)
+        .post("/api/reviews/")
+        .send(reviewsObj)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes data that cannot be found");
+        });
+    });
+    it("POST 404: category does not exists", () => {
+      const reviewsObj = {
+        owner: "mallionaire",
+        title: "title of review",
+        review_body: "review body",
+        designer: "designer",
+        category: "not_a_category",
+        review_img_url: "www.review_image_url.co.uk",
+      };
+
+      return request(app)
+        .post("/api/reviews/")
+        .send(reviewsObj)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("request includes data that cannot be found");
+        });
+    });
+    it("POST 400: review object not formatted properly", () => {
+      const reviewsObj = {
+        username: "mallionaire",
+        MYtitle: "title of review",
+        review_body: "review body",
+        designer: "designer",
+        cat: "social deduction",
+        review_img_url: "www.review_image_url.co.uk",
+      };
+
+      return request(app)
+        .post("/api/reviews/")
+        .send(reviewsObj)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("invalid format");
+        });
+    });
   });
 });
 
