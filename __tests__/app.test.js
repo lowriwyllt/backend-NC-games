@@ -46,6 +46,37 @@ describe("/api/categories", () => {
         });
     });
   });
+  describe("POST", () => {
+    it("POST 201: responds with posted category", () => {
+      const catgeoryObj = {
+        slug: "category_name",
+        description: "category_description",
+      };
+      return request(app)
+        .post("/api/categories")
+        .send(catgeoryObj)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.category).toEqual({
+            slug: "category_name",
+            description: "category_description",
+          });
+        });
+    });
+    it("POST 400: category not formatted properly", () => {
+      const catgeoryObj = {
+        name: "category_name",
+        not_description: "category_description",
+      };
+      return request(app)
+        .post("/api/categories")
+        .send(catgeoryObj)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("invalid format");
+        });
+    });
+  });
 });
 
 describe("/api/reviews/:review_id", () => {

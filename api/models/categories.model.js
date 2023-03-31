@@ -1,5 +1,4 @@
 const db = require("../../db/connection");
-const categories = require("../../db/data/test-data/categories");
 
 exports.fetchCategories = () => {
   const selectCatogoriesString = `
@@ -8,5 +7,17 @@ exports.fetchCategories = () => {
     `;
   return db.query(selectCatogoriesString).then((response) => {
     return response.rows;
+  });
+};
+
+exports.insertCategory = (slug, description) => {
+  const insertCategoryStr = `
+  INSERT INTO categories
+  (slug, description)
+  VALUES ($1, $2)
+  RETURNING *
+  `;
+  return db.query(insertCategoryStr, [slug, description]).then((response) => {
+    return response.rows[0];
   });
 };
