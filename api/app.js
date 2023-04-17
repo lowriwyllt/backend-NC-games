@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 
+const cors = require("cors");
+app.use(cors());
+
 const apiRouter = require("./routes/api-router");
 const categoriesRouter = require("./routes/categories-router");
 const reviewsRouter = require("./routes/reviews-router");
