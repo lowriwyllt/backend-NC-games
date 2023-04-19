@@ -40,6 +40,7 @@ exports.fetchReviews = (
     "review_img_url",
     "created_at",
     "votes",
+    "comment_count",
   ];
   if (sort_by && !reviewsGreenList.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "invalid sort_by query" });
@@ -82,8 +83,8 @@ exports.fetchReviews = (
     countQueryParams.push(category);
   }
   selectReviewsString += `  GROUP BY reviews.review_id
-  ORDER BY reviews.${sort_by} ${order}
-  LIMIT $1 OFFSET $2`;
+  ORDER BY ${sort_by} ${order}
+  LIMIT $1 OFFSET $2`; //ORDER BY reviews.${sort_by} ${order}
 
   return db.query(selectReviewsString, queryParams).then((response) => {
     return db.query(countRowsStr, countQueryParams).then((countResponse) => {
